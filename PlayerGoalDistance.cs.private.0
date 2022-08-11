@@ -1,0 +1,50 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerGoalDistance : MonoBehaviour
+{
+    private Transform _goalMarker;
+    private float totalDistance;
+
+    void Start()
+    {
+        var o = GameObject.FindWithTag(TagConstants.Finish);
+        if (o == null)
+        {
+            Debug.LogWarning("goalmarker not found");
+            return;
+        }
+        _goalMarker = o.transform;
+
+        totalDistance = getDistanceToGoal();
+    }
+
+    void Update()
+    {
+        if (_goalMarker == null)
+            return;
+
+        float distanceLeft = getDistanceToGoal();
+        float completed = (totalDistance - distanceLeft) / totalDistance;
+
+        if (completed < 0.0f)
+        {
+            completed = 0.0f; // if player managed to backtrack from beginning
+        }
+        if (completed > 1.0f)
+        {
+            completed = 1.0f;
+        }
+
+        SoundManager.Instance.SetParameter(SoundManager.Parameters.RaceProgress, completed);
+
+        GameManager.Instance.UpdateProgress(completed);
+    }
+
+    float getDistanceToGoal()
+    {
+        Vector3 distanceVector = transform.position - _goalMarker.position;
+        return distanceVector.magnitude;
+    }
+}

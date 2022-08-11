@@ -1,0 +1,49 @@
+using UnityEngine;
+
+public class CollisionSound : MonoBehaviour
+{
+    [Tooltip("Max impulse magnitude to play max sound")] [SerializeField]
+    private float _clampImpulseMagnitude = 5000.0f;
+
+    public enum CollisionMaterial
+    {
+        None = 0,
+        Wood = 1,
+        Stone = 2,
+        Player = 3,
+        Yeti = 4,
+        Ground = 5,
+        Ice = 6,
+    }
+
+    [SerializeField] CollisionMaterial ChooseCollisionMaterial;
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == TagConstants.OtherPlayer)
+        {
+            print("Collided with OtherPlayer");
+        }
+
+        if (collision.gameObject.tag == TagConstants.Player)
+        {
+            var clampedMagnitude = collision.impulse.magnitude;
+            if (clampedMagnitude > _clampImpulseMagnitude)
+            {
+                clampedMagnitude = _clampImpulseMagnitude;
+            }
+
+            var magnitude = clampedMagnitude / _clampImpulseMagnitude;
+            var sound = "Collision_" + ChooseCollisionMaterial.ToString();
+
+            // Debug.Log("Collision between: " + this.tag + " and " + sound + ": " +
+            // collision.impulse.magnitude + " magnitude: " + magnitude + "clampImpulseMagnitude: " +
+            // _clampImpulseMagnitude);
+
+            if (ChooseCollisionMaterial != CollisionMaterial.None)
+            {
+                SoundManager.Instance.PlayCollisionSound(sound, magnitude, collision.gameObject.transform);
+            }
+        }
+    }
+}
